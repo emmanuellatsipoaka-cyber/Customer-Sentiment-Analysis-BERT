@@ -858,20 +858,20 @@ with st.sidebar:
     st.markdown("### 📚 Notions NLP intégrées")
     st.markdown("""
     <div style="font-size:.81rem;color:#555;line-height:2">
-      ✅ Tokenisation <em>(slide 54)</em><br>
-      ✅ Stop words <em>(slide 66)</em><br>
-      ✅ Stemming <em>(slide 83)</em><br>
-      ✅ Nuage de mots <em>(slide 32)</em><br>
-      ✅ Polarité TextBlob <em>(slide 29)</em><br>
-      ✅ BOW / TF-IDF <em>(slide 38)</em><br>
-      ✅ Régression logistique <em>(slide 116)</em><br>
-      ✅ Matrice de confusion <em>(slide 128)</em><br>
+      ✅ Tokenisation <em></em><br>
+      ✅ Stop words <em></em><br>
+      ✅ Stemming <em></em><br>
+      ✅ Nuage de mots <em></em><br>
+      ✅ Polarité TextBlob <em></em><br>
+      ✅ BOW / TF-IDF <em></em><br>
+      ✅ Régression logistique <em></em><br>
+      ✅ Matrice de confusion <em></em><br>
       ✅ DistilBERT / BERT<br>
-      ✅ Train / Test split <em>(slide 124)</em>
+      ✅ Train / Test split <em></em>
     </div>
     """, unsafe_allow_html=True)
     st.markdown("---")
-    st.caption("ISE3 ENEAM · Prof. Hounna · 2025")
+    st.caption("ISE3 ENEAM · Emmanuella TSIPOAKA · 2025-2026")
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -880,7 +880,7 @@ with st.sidebar:
 st.markdown("""
 <div class="hero">
   <h1>✅ AvisCheckeur</h1>
-  <p>Analyse de sentiments intelligente · Import CSV/Excel · Résumé IA Google Gemini · Export PDF · DistilBERT & BERT</p>
+  <p>Analyse de sentiments intelligente</p>
 </div>
 """, unsafe_allow_html=True)
 
