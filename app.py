@@ -821,7 +821,7 @@ with st.sidebar:
     n_batch = st.slider("Avis à analyser (IMDB)", 20, 200, 50, 10)
 
     st.markdown("---")
-    st.markdown("### 🤖 Google Gemini AI")
+    st.markdown("### Google Gemini AI")
     gemini_key = st.text_input(
         "Clé API Google AI Studio",
         type="password",
@@ -1303,9 +1303,9 @@ with tab4:
         height=100,
     )
     col_o1, col_o2, col_o3 = st.columns(3)
-    with col_o1: do_lower = st.checkbox("🔡 Lowercasing *(slide 81)*",  True)
-    with col_o2: do_stop  = st.checkbox("🚫 Stop words *(slide 66)*",   True)
-    with col_o3: do_stem  = st.checkbox("✂️ Stemming *(slide 83)*",     False)
+    with col_o1: do_lower = st.checkbox("🔡 Lowercasing **",  True)
+    with col_o2: do_stop  = st.checkbox("🚫 Stop words **",   True)
+    with col_o3: do_stem  = st.checkbox("✂️ Stemming **",     False)
 
     if st.button("▶️ Appliquer le pipeline NLP", use_container_width=True):
         st.markdown("**Étape 1 — Texte brut**")
@@ -1313,12 +1313,12 @@ with tab4:
 
         lowered = sample_text.lower() if do_lower else sample_text
         if do_lower:
-            st.markdown("**Étape 2 — Lowercasing** *(slide 81)*")
+            st.markdown("**Étape 2 — Lowercasing** **")
             st.code(lowered)
 
         clean  = re.sub(r"[^a-zA-Z\s]", " ", lowered)
         tokens = clean.split()
-        st.markdown(f"**Étape 3 — Tokenisation** *(slide 54)* → **{len(tokens)} tokens**")
+        st.markdown(f"**Étape 3 — Tokenisation** ** → **{len(tokens)} tokens**")
         st.code(str(tokens[:20]))
 
         if do_stop:
@@ -1329,7 +1329,7 @@ with tab4:
             }
             tokens = [t for t in tokens if t not in STOP_W and len(t) > 2]
             st.markdown(
-                f"**Étape 4 — Suppression stop words** *(slide 66)* "
+                f"**Étape 4 — Suppression stop words** ** "
                 f"→ **{len(tokens)} tokens restants**"
             )
             st.code(str(tokens[:20]))
@@ -1341,7 +1341,7 @@ with tab4:
                 from nltk.stem import PorterStemmer
                 ps    = PorterStemmer()
                 stems = [ps.stem(t) for t in tokens[:12]]
-                st.markdown("**Étape 5 — Stemming** *(slide 83)*")
+                st.markdown("**Étape 5 — Stemming** **")
                 st.dataframe(
                     pd.DataFrame({"Token original": tokens[:12], "Forme réduite (stem)": stems}),
                     use_container_width=True,
@@ -1355,7 +1355,7 @@ with tab4:
         df_bow = pd.DataFrame(freq.most_common(14), columns=["Token", "Fréquence"])
         fig_bow = px.bar(
             df_bow, x="Token", y="Fréquence",
-            title="Bag of Words — Top 14 tokens *(slide 38)*",
+            title="Bag of Words — Top 14 tokens **",
             color_discrete_sequence=[template["primary"]],
         )
         fig_bow.update_layout(height=290, margin=dict(t=45, b=0))
@@ -1363,7 +1363,7 @@ with tab4:
 
         # TextBlob
         st.markdown("---")
-        st.markdown("**Polarité & Subjectivité — TextBlob** *(slide 29)*")
+        st.markdown("**Polarité & Subjectivité — TextBlob** **")
         tb = get_textblob_scores(sample_text)
         c1, c2 = st.columns(2)
         with c1:
@@ -1375,7 +1375,7 @@ with tab4:
 
         # Nuage de mots
         st.markdown("---")
-        st.markdown("**Nuage de mots** *(slide 32)*")
+        st.markdown("**Nuage de mots** **")
         img = make_wordcloud_img(" ".join(tokens), template["primary"], template["cmap_pos"])
         if img:
             st.markdown(
@@ -1458,7 +1458,7 @@ with tab5:
             st.plotly_chart(fig_bx, use_container_width=True)
 
         # Nuages de mots
-        st.markdown('<div class="sec-title">☁️ Nuages de mots comparatifs *(slide 32)*</div>',
+        st.markdown('<div class="sec-title">☁️ Nuages de mots comparatifs **</div>',
                     unsafe_allow_html=True)
         col_w1, col_w2 = st.columns(2)
         pos_t = " ".join(df_v[df_v["sentiment_pred"] == "POSITIVE"]["review"].str[:200])
