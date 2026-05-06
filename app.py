@@ -2,7 +2,7 @@
 =============================================================
   AvisCheckeur — Analyse de avis IMDB / Custom
   ISE3 ENEAM · Prof. Gracieux Hounna · 2025
-  Auteur: Emmanuella TSIPOAKA 
+  Auteur: Emmanuella TSIPOAKA
   Stack : Streamlit · HuggingFace Transformers · TextBlob
           Google Gemini AI · FPDF2 · Plotly · NLTK
 =============================================================
@@ -35,7 +35,6 @@ st.markdown("""
     font-family: 'DM Sans', sans-serif;
   }
 
-  /* ── Hero ── */
   .hero {
     background: linear-gradient(135deg, #00b67a 0%, #005c3e 100%);
     padding: 2.2rem 2.5rem 1.8rem;
@@ -76,7 +75,6 @@ st.markdown("""
     font-weight: 300;
   }
 
-  /* ── Review card (Trustpilot style) ── */
   .review-card {
     background: #ffffff;
     border: 1px solid #ececec;
@@ -116,7 +114,6 @@ st.markdown("""
   .badge-neg { background: #fdf0f0; color: #b91c1c; border: 1px solid #fccaca; }
   .badge-neu { background: #fff8ec; color: #92400e; border: 1px solid #fed7aa; }
 
-  /* ── Stat boxes ── */
   .stat-box {
     background: #ffffff;
     border: 1px solid #ececec;
@@ -128,7 +125,6 @@ st.markdown("""
   .stat-box .num  { font-size: 2.1rem; font-weight: 700; line-height: 1.1; }
   .stat-box .lbl  { font-size: .76rem; color: #888; margin-top: .35rem; font-weight: 500; letter-spacing: .2px; }
 
-  /* ── Score pill ── */
   .score-pill {
     background: #00b67a;
     color: white;
@@ -142,7 +138,6 @@ st.markdown("""
   .score-pill.neg { background: #e63946; }
   .score-pill.neu { background: #f4a261; }
 
-  /* ── NLP keyword tags ── */
   .nlp-tag {
     display: inline-block;
     padding: .22rem .65rem;
@@ -160,7 +155,6 @@ st.markdown("""
     border: 1px solid #fccaca;
   }
 
-  /* ── Section titles ── */
   .sec-title {
     font-size: 1.1rem;
     font-weight: 700;
@@ -173,7 +167,6 @@ st.markdown("""
     gap: .5rem;
   }
 
-  /* ── AI summary box ── */
   .ai-box {
     background: linear-gradient(135deg, #f0fbf6 0%, #e6f9f1 100%);
     border: 1.5px solid #00b67a;
@@ -197,7 +190,6 @@ st.markdown("""
     white-space: pre-wrap;
   }
 
-  /* ── Info box ── */
   .info-box {
     background: #f0fbf6;
     border: 1.5px solid #00b67a;
@@ -205,7 +197,6 @@ st.markdown("""
     padding: 1.2rem 1.4rem;
   }
 
-  /* ── Buttons ── */
   .stButton > button {
     background: #00b67a !important;
     color: white !important;
@@ -220,7 +211,6 @@ st.markdown("""
     background: #009966 !important;
   }
 
-  /* ── Tabs ── */
   .stTabs [data-baseweb="tab"] {
     font-weight: 600;
     font-size: .92rem;
@@ -230,7 +220,6 @@ st.markdown("""
     border-bottom-color: #00b67a !important;
   }
 
-  /* ── TrustScore banner ── */
   .trust-banner {
     background: white;
     border: 1px solid #ececec;
@@ -243,7 +232,6 @@ st.markdown("""
     box-shadow: 0 2px 8px rgba(0,0,0,.05);
   }
 
-  /* ── Empty state ── */
   .empty-state {
     background: #f8fffe;
     border: 2px dashed #b3ecd4;
@@ -252,7 +240,7 @@ st.markdown("""
     text-align: center;
     color: #666;
   }
-  .empty-state .icon { font-size: 2.5rem; margin-bottom: .6rem; }
+  .empty-state .icon  { font-size: 2.5rem; margin-bottom: .6rem; }
   .empty-state .title { font-weight: 700; font-size: 1rem; color: #333; margin-bottom: .3rem; }
   .empty-state .sub   { font-size: .85rem; }
 </style>
@@ -301,7 +289,6 @@ NAMES_LIST = [
 
 @st.cache_resource(show_spinner=False)
 def load_transformer(model_key: str):
-    """Charge le pipeline HuggingFace (DistilBERT ou BERT)."""
     from transformers import pipeline
     model_ids = {
         "DistilBERT ⚡": "distilbert-base-uncased-finetuned-sst-2-english",
@@ -317,13 +304,6 @@ def load_transformer(model_key: str):
 
 @st.cache_data(show_spinner=False)
 def load_imdb(path: str, n: int = 100) -> pd.DataFrame:
-    """
-    Charge et pré-traite le dataset IMDB.
-    Pré-traitements appliqués (cours NLP ISE3) :
-      - Suppression des balises HTML
-      - Lowercasing (slide 81)
-      - Suppression de la ponctuation (slide 73)
-    """
     df = pd.read_csv(path)
     df = df.sample(n=min(n, len(df)), random_state=42).reset_index(drop=True)
     df["review_clean"] = (
@@ -338,7 +318,6 @@ def load_imdb(path: str, n: int = 100) -> pd.DataFrame:
 
 
 def load_custom_file(uploaded_file, text_col=None):
-    """Charge un fichier CSV / Excel / TSV et détecte automatiquement la colonne texte."""
     name = uploaded_file.name.lower()
     if name.endswith((".xlsx", ".xls")):
         df = pd.read_excel(uploaded_file)
@@ -347,7 +326,6 @@ def load_custom_file(uploaded_file, text_col=None):
     else:
         df = pd.read_csv(uploaded_file, encoding="utf-8", errors="replace")
 
-    # Auto-détection de la colonne texte
     if text_col is None:
         priority = ["review", "text", "comment", "avis", "texte", "content",
                     "body", "description", "message"]
@@ -377,7 +355,6 @@ def load_custom_file(uploaded_file, text_col=None):
 
 
 def normalize_label(raw: str) -> str:
-    """Normalise les labels bruts HuggingFace → POSITIVE / NEGATIVE / NEUTRAL."""
     mapping = {
         "LABEL_0": "NEGATIVE", "LABEL_1": "POSITIVE",
         "POSITIVE": "POSITIVE", "NEGATIVE": "NEGATIVE",
@@ -386,7 +363,6 @@ def normalize_label(raw: str) -> str:
 
 
 def score_to_sentiment(score: float, label: str, threshold: float = 0.70):
-    """Applique le seuil de neutralité (slide 114 — classification 3 classes)."""
     sentiment = normalize_label(label)
     if score < threshold:
         sentiment = "NEUTRAL"
@@ -394,10 +370,6 @@ def score_to_sentiment(score: float, label: str, threshold: float = 0.70):
 
 
 def get_textblob_scores(text: str) -> dict:
-    """
-    Calcule la polarité et la subjectivité via TextBlob (slide 29).
-    Polarité ∈ [-1, 1] | Subjectivité ∈ [0, 1]
-    """
     try:
         from textblob import TextBlob
         tb = TextBlob(text)
@@ -410,10 +382,6 @@ def get_textblob_scores(text: str) -> dict:
 
 
 def extract_keywords(text: str, top_n: int = 10) -> list:
-    """
-    Extraction des mots-clés après suppression des stop words.
-    Utilisé pour nuage de mots (slide 32) et tags visuels.
-    """
     STOP = {
         "the","a","an","and","or","but","in","on","at","to","for","of","with",
         "this","that","it","is","was","are","were","be","been","have","has",
@@ -431,7 +399,6 @@ def extract_keywords(text: str, top_n: int = 10) -> list:
 
 def make_wordcloud_img(text: str, color: str = "#00b67a",
                        cmap: str = "Greens") -> str:
-    """Génère un nuage de mots (slide 32) et retourne une image base64."""
     try:
         from wordcloud import WordCloud
         import matplotlib
@@ -473,7 +440,6 @@ def stars_html(sentiment: str) -> str:
 
 def review_card_html(text: str, sentiment: str, confidence: float,
                      reviewer: str = "Anonyme", date: str = "") -> str:
-    """Génère une carte d'avis au style Trustpilot."""
     badge_cls = {
         "POSITIVE": "badge-pos",
         "NEGATIVE": "badge-neg",
@@ -506,13 +472,14 @@ def review_card_html(text: str, sentiment: str, confidence: float,
 
 
 # ══════════════════════════════════════════════════════════════════════════════
-# GOOGLE GEMINI AI SUMMARY
+# GOOGLE GEMINI AI SUMMARY — VERSION CORRIGÉE
 # ══════════════════════════════════════════════════════════════════════════════
 
 def call_gemini_summary(stats_text: str, api_key: str) -> str:
     """
     Appel à l'API Google Gemini (gemini-1.5-flash) pour générer
     un résumé analytique structuré des sentiments.
+    VERSION CORRIGÉE : gestion d'erreurs robuste + navigation sécurisée JSON.
     """
     if not api_key or not api_key.strip():
         raise ValueError("Clé API Google Gemini manquante.")
@@ -545,7 +512,7 @@ def call_gemini_summary(stats_text: str, api_key: str) -> str:
 
     url = (
         "https://generativelanguage.googleapis.com/v1beta/models/"
-        f"gemini-1.5-flash:generateContent?key={api_key}"
+        f"gemini-1.5-flash:generateContent?key={api_key.strip()}"
     )
     req = urllib.request.Request(
         url,
@@ -556,16 +523,49 @@ def call_gemini_summary(stats_text: str, api_key: str) -> str:
     try:
         with urllib.request.urlopen(req, timeout=30) as resp:
             data = json.loads(resp.read().decode("utf-8"))
-        return data["candidates"][0]["content"]["parts"][0]["text"]
+
+        # Navigation sécurisée dans la réponse JSON
+        candidates = data.get("candidates", [])
+        if not candidates:
+            raise RuntimeError(
+                "Réponse vide de Gemini (aucun candidat). "
+                "Vérifiez votre clé API ou les quotas."
+            )
+
+        parts = candidates[0].get("content", {}).get("parts", [])
+        if not parts:
+            raise RuntimeError(
+                "Réponse vide de Gemini (aucune partie). "
+                "La génération a peut-être été bloquée par les filtres de sécurité."
+            )
+
+        text_result = parts[0].get("text", "").strip()
+        if not text_result:
+            raise RuntimeError("Le modèle a retourné un texte vide.")
+
+        return text_result
+
     except urllib.error.HTTPError as e:
         body = e.read().decode("utf-8")
-        raise RuntimeError(f"Erreur HTTP {e.code} — {body[:300]}")
+        try:
+            err_json = json.loads(body)
+            msg = err_json.get("error", {}).get("message", body[:300])
+        except Exception:
+            msg = body[:300]
+        raise RuntimeError(f"Erreur HTTP {e.code} — {msg}")
+    except urllib.error.URLError as e:
+        raise RuntimeError(
+            f"Erreur réseau : {e.reason}. "
+            "Vérifiez votre connexion internet."
+        )
+    except RuntimeError:
+        raise
     except Exception as e:
-        raise RuntimeError(f"Erreur API Gemini : {e}")
+        raise RuntimeError(f"Erreur inattendue API Gemini : {e}")
 
 
 # ══════════════════════════════════════════════════════════════════════════════
-# PDF EXPORT (fpdf2 — aucune dépendance système)
+# PDF EXPORT — VERSION CORRIGÉE (fpdf2)
 # ══════════════════════════════════════════════════════════════════════════════
 
 def generate_pdf_report(df_r: pd.DataFrame, summary_text: str,
@@ -573,7 +573,9 @@ def generate_pdf_report(df_r: pd.DataFrame, summary_text: str,
                         model_name: str, n_reviews: int) -> bytes:
     """
     Génère un rapport PDF professionnel avec FPDF2.
-    Sections : En-tête · Statistiques · Graphique · Résumé IA · Échantillon avis
+    VERSION CORRIGÉE :
+      - kpi_row() avec gestion de position x/y explicite
+      - output() compatible fpdf2 >= 2.x (bytearray → bytes)
     """
     from fpdf import FPDF
 
@@ -585,7 +587,6 @@ def generate_pdf_report(df_r: pd.DataFrame, summary_text: str,
     pct_pos  = n_pos / max(len(df_r), 1)
     trust    = round(1 + pct_pos * 4, 1)
 
-    # Convertit la couleur hex principale en R, G, B
     def hex2rgb(h):
         h = h.lstrip("#")
         return tuple(int(h[i:i+2], 16) for i in (0, 2, 4))
@@ -626,56 +627,74 @@ def generate_pdf_report(df_r: pd.DataFrame, summary_text: str,
             self.ln(3)
 
         def kpi_row(self, items):
-            """Affiche une rangée de KPI colorés."""
+            """
+            Affiche une rangée de KPI colorés.
+            CORRIGÉ : positions x/y explicites pour éviter les décalages.
+            """
             w = 190 / len(items)
-            for label, val, color in items:
+            start_y = self.get_y()
+            start_x = 10  # marge gauche fixe
+
+            for idx, (label, val, color) in enumerate(items):
                 rgb = hex2rgb(color)
+                x = start_x + idx * w
+                y = start_y
+
+                # Fond de la boîte KPI
                 self.set_fill_color(245, 245, 245)
                 self.set_draw_color(220, 220, 220)
-                x, y = self.get_x(), self.get_y()
                 self.rect(x, y, w - 2, 22, "DF")
+
+                # Valeur (grande, colorée)
                 self.set_font("Helvetica", "B", 15)
                 self.set_text_color(*rgb)
                 self.set_xy(x, y + 2)
                 self.cell(w - 2, 10, str(val), align="C")
+
+                # Label (petit, gris)
                 self.set_font("Helvetica", "", 8)
                 self.set_text_color(100, 100, 100)
                 self.set_xy(x, y + 13)
                 self.cell(w - 2, 6, label, align="C")
-                self.set_xy(x + w, y)
-            self.ln(26)
+
+            # Repositionner après la rangée
+            self.set_xy(start_x, start_y + 26)
             self.set_text_color(0, 0, 0)
             self.set_draw_color(0, 0, 0)
+            self.ln(4)
 
     pdf = PDF()
     pdf.set_auto_page_break(auto=True, margin=18)
     pdf.add_page()
 
-    # ── KPIs principaux ────────────────────────────────────────────────────
+    # ── KPIs principaux ──────────────────────────────────────────────────────
     pdf.section_title("Statistiques Clés")
     pdf.kpi_row([
-        ("Avis analysés",     n_reviews,         "#333333"),
-        ("Positifs",          n_pos,              template["pos"]),
-        ("Négatifs",          n_neg,              template["neg"]),
-        ("Neutres",           n_neu,              template["neu"]),
-        ("Confiance moy.",    f"{avg_conf:.0%}",  template["primary"]),
-        ("TrustScore",        f"{trust}/5",       template["primary"]),
+        ("Avis analysés",    n_reviews,          "#333333"),
+        ("Positifs",         n_pos,               template["pos"]),
+        ("Négatifs",         n_neg,               template["neg"]),
+        ("Neutres",          n_neu,               template["neu"]),
+        ("Confiance moy.",   f"{avg_conf:.0%}",   template["primary"]),
+        ("TrustScore",       f"{trust}/5",         template["primary"]),
     ])
 
-    # ── Tableau détail ─────────────────────────────────────────────────────
+    # ── Tableau détail ────────────────────────────────────────────────────────
     pdf.set_font("Helvetica", "B", 9)
     pdf.set_fill_color(*primary_rgb)
     pdf.set_text_color(255, 255, 255)
-    cols  = ["Catégorie", "Nombre", "Pourcentage", "Confiance moy."]
-    widths= [65, 35, 50, 40]
+    cols   = ["Catégorie", "Nombre", "Pourcentage", "Confiance moy."]
+    widths = [65, 35, 50, 40]
     for col, w in zip(cols, widths):
         pdf.cell(w, 8, col, border=1, fill=True, align="C")
     pdf.ln()
 
     row_data = [
-        ("POSITIF",  n_pos,  n_pos/max(len(df_r),1), df_r[df_r["sentiment_pred"]=="POSITIVE"]["confidence"].mean() if n_pos>0 else 0),
-        ("NÉGATIF",  n_neg,  n_neg/max(len(df_r),1), df_r[df_r["sentiment_pred"]=="NEGATIVE"]["confidence"].mean() if n_neg>0 else 0),
-        ("NEUTRE",   n_neu,  n_neu/max(len(df_r),1), df_r[df_r["sentiment_pred"]=="NEUTRAL"]["confidence"].mean()  if n_neu>0 else 0),
+        ("POSITIF", n_pos, n_pos / max(len(df_r), 1),
+         df_r[df_r["sentiment_pred"] == "POSITIVE"]["confidence"].mean() if n_pos > 0 else 0),
+        ("NÉGATIF", n_neg, n_neg / max(len(df_r), 1),
+         df_r[df_r["sentiment_pred"] == "NEGATIVE"]["confidence"].mean() if n_neg > 0 else 0),
+        ("NEUTRE",  n_neu, n_neu / max(len(df_r), 1),
+         df_r[df_r["sentiment_pred"] == "NEUTRAL"]["confidence"].mean()  if n_neu > 0 else 0),
     ]
     pdf.set_font("Helvetica", "", 9)
     for i, (cat, cnt, pct, conf) in enumerate(row_data):
@@ -685,11 +704,12 @@ def generate_pdf_report(df_r: pd.DataFrame, summary_text: str,
         pdf.cell(65, 7, f"  {cat}", border=1, fill=True)
         pdf.cell(35, 7, str(cnt),       border=1, fill=True, align="C")
         pdf.cell(50, 7, f"{pct:.1%}",   border=1, fill=True, align="C")
-        pdf.cell(40, 7, f"{conf:.1%}" if conf > 0 else "—", border=1, fill=True, align="C")
+        pdf.cell(40, 7, f"{conf:.1%}" if conf > 0 else "—",
+                 border=1, fill=True, align="C")
         pdf.ln()
     pdf.ln(6)
 
-    # ── Graphique camembert ────────────────────────────────────────────────
+    # ── Graphiques matplotlib ─────────────────────────────────────────────────
     try:
         import matplotlib
         matplotlib.use("Agg")
@@ -699,7 +719,8 @@ def generate_pdf_report(df_r: pd.DataFrame, summary_text: str,
         pie_colors = [template["pos"], template["neg"], template["neu"]]
         labels_pie = ["Positif", "Négatif", "Neutre"]
         values_pie = [n_pos, n_neg, n_neu]
-        non_zero   = [(l, v, c) for l, v, c in zip(labels_pie, values_pie, pie_colors) if v > 0]
+        non_zero   = [(l, v, c) for l, v, c in
+                      zip(labels_pie, values_pie, pie_colors) if v > 0]
         if non_zero:
             axes[0].pie(
                 [v for _, v, _ in non_zero],
@@ -710,7 +731,8 @@ def generate_pdf_report(df_r: pd.DataFrame, summary_text: str,
                 pctdistance=0.78,
                 wedgeprops={"edgecolor": "white", "linewidth": 2},
             )
-        axes[0].set_title("Répartition des sentiments", fontweight="bold", fontsize=10)
+        axes[0].set_title("Répartition des sentiments",
+                          fontweight="bold", fontsize=10)
 
         for sent, clr in [("POSITIVE", template["pos"]),
                           ("NEGATIVE", template["neg"]),
@@ -719,7 +741,8 @@ def generate_pdf_report(df_r: pd.DataFrame, summary_text: str,
             if len(subset) > 0:
                 axes[1].hist(subset.values, bins=12, alpha=0.75,
                              color=clr, label=sent, edgecolor="white")
-        axes[1].set_title("Distribution des scores de confiance", fontweight="bold", fontsize=10)
+        axes[1].set_title("Distribution des scores de confiance",
+                          fontweight="bold", fontsize=10)
         axes[1].set_xlabel("Score de confiance")
         axes[1].set_ylabel("Nombre d'avis")
         axes[1].legend(fontsize=8)
@@ -732,20 +755,20 @@ def generate_pdf_report(df_r: pd.DataFrame, summary_text: str,
         plt.close()
         chart_buf.seek(0)
 
-        # Sauvegarde temporaire pour FPDF
         tmp_img = tempfile.NamedTemporaryFile(delete=False, suffix=".png")
         tmp_img.write(chart_buf.read())
         tmp_img.close()
         pdf.image(tmp_img.name, x=10, w=190)
         os.unlink(tmp_img.name)
         pdf.ln(4)
+
     except Exception as e:
         pdf.set_font("Helvetica", "I", 9)
         pdf.set_text_color(150, 150, 150)
         pdf.cell(0, 8, f"[Graphiques non disponibles : {e}]", ln=True)
         pdf.set_text_color(0, 0, 0)
 
-    # ── Résumé IA ──────────────────────────────────────────────────────────
+    # ── Résumé IA ─────────────────────────────────────────────────────────────
     pdf.section_title("Analyse IA — Résumé Intelligent (Google Gemini)")
     pdf.set_font("Helvetica", "", 9)
     pdf.set_text_color(30, 30, 30)
@@ -764,17 +787,19 @@ def generate_pdf_report(df_r: pd.DataFrame, summary_text: str,
     else:
         pdf.set_text_color(160, 160, 160)
         pdf.cell(0, 8,
-                 "Aucun résumé IA disponible. Cliquez sur 'Générer le résumé IA' avant l'export.",
+                 "Aucun résumé IA disponible. "
+                 "Cliquez sur 'Générer le résumé IA' avant l'export.",
                  ln=True)
     pdf.set_text_color(0, 0, 0)
 
-    # ── Échantillon d'avis ─────────────────────────────────────────────────
+    # ── Échantillon d'avis ────────────────────────────────────────────────────
     pdf.add_page()
     pdf.section_title("Échantillon d'Avis Analysés (8 premiers)")
     pdf.set_font("Helvetica", "B", 8)
     pdf.set_fill_color(*primary_rgb)
     pdf.set_text_color(255, 255, 255)
-    for col, w in [("Extrait de l'avis", 115), ("Sentiment", 35), ("Confiance", 25), ("Polarité", 15)]:
+    for col, w in [("Extrait de l'avis", 115), ("Sentiment", 35),
+                   ("Confiance", 25), ("Polarité", 15)]:
         pdf.cell(w, 7, col, border=1, fill=True, align="C")
     pdf.ln()
 
@@ -783,14 +808,21 @@ def generate_pdf_report(df_r: pd.DataFrame, summary_text: str,
     for i, row in df_r.head(8).iterrows():
         bg = (248, 248, 248) if i % 2 == 0 else (255, 255, 255)
         pdf.set_fill_color(*bg)
-        excerpt = str(row["review"])[:90] + ("…" if len(str(row["review"])) > 90 else "")
+        excerpt = str(row["review"])[:90] + (
+            "…" if len(str(row["review"])) > 90 else "")
         pdf.cell(115, 6, f"  {excerpt}", border=1, fill=True)
         pdf.cell(35,  6, str(row["sentiment_pred"]),       border=1, fill=True, align="C")
         pdf.cell(25,  6, f"{row['confidence']:.0%}",       border=1, fill=True, align="C")
         pdf.cell(15,  6, f"{row.get('polarity', 0):+.2f}", border=1, fill=True, align="C")
         pdf.ln()
 
-    return bytes(pdf.output())
+    # ── CORRECTION CRITIQUE : output() fpdf2 ─────────────────────────────────
+    output = pdf.output()
+    if isinstance(output, (bytes, bytearray)):
+        return bytes(output)
+    else:
+        # Fallback pour versions plus anciennes
+        return output.encode("latin-1")
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -821,15 +853,19 @@ with st.sidebar:
     n_batch = st.slider("Avis à analyser (IMDB)", 20, 200, 50, 10)
 
     st.markdown("---")
-    st.markdown("### Google Gemini AI")
+    st.markdown("### 🤖 Google Gemini AI")
+
+    # Clé pré-remplie (modifiable par l'utilisateur)
     gemini_key = st.text_input(
         "Clé API Google AI Studio",
+        value="AIzaSyDeT2D2zalWm3cPC5K7IFpbCSibK43l87s",
         type="password",
-        placeholder="AIzaSy...",
         help="Obtenez votre clé sur https://aistudio.google.com",
     )
-    if gemini_key:
-        st.success("✅ Clé API configurée")
+    if gemini_key and gemini_key.startswith("AIza"):
+        st.success("✅ Clé API Google Gemini configurée")
+    elif gemini_key:
+        st.warning("⚠️ Format de clé inhabituel (devrait commencer par AIza…)")
     else:
         st.markdown("""
         <div style="background:#fff8ec;border:1px solid #fed7aa;border-radius:8px;
@@ -858,16 +894,16 @@ with st.sidebar:
     st.markdown("### 📚 Notions NLP intégrées")
     st.markdown("""
     <div style="font-size:.81rem;color:#555;line-height:2">
-      ✅ Tokenisation <em></em><br>
-      ✅ Stop words <em></em><br>
-      ✅ Stemming <em></em><br>
-      ✅ Nuage de mots <em></em><br>
-      ✅ Polarité TextBlob <em></em><br>
-      ✅ BOW / TF-IDF <em></em><br>
-      ✅ Régression logistique <em></em><br>
-      ✅ Matrice de confusion <em></em><br>
+      ✅ Tokenisation<br>
+      ✅ Stop words<br>
+      ✅ Stemming<br>
+      ✅ Nuage de mots<br>
+      ✅ Polarité TextBlob<br>
+      ✅ BOW / TF-IDF<br>
+      ✅ Régression logistique<br>
+      ✅ Matrice de confusion<br>
       ✅ DistilBERT / BERT<br>
-      ✅ Train / Test split <em></em>
+      ✅ Train / Test split
     </div>
     """, unsafe_allow_html=True)
     st.markdown("---")
@@ -880,16 +916,14 @@ with st.sidebar:
 st.markdown("""
 <div class="hero">
   <h1>✅ AvisCheckeur</h1>
-  <p>Analyse de sentiments intelligente</p>
+  <p>Analyse de sentiments intelligente · ISE3 ENEAM · Prof. Gracieux Hounna</p>
 </div>
 """, unsafe_allow_html=True)
 
-# Chargement du modèle
 with st.spinner(f"⏳ Chargement de {model_choice}…"):
     classifier = load_transformer(model_choice)
 st.success(f"✅ **{model_choice}** chargé et prêt !")
 
-# Onglets
 tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
     "🎬 Analyser un avis",
     "📂 Importer un fichier",
@@ -926,7 +960,8 @@ with tab1:
         analyze_btn = st.button("🔍 Analyser cet avis", use_container_width=True)
 
     with col_out:
-        st.markdown('<div class="sec-title">📊 Résultat de l\'analyse</div>', unsafe_allow_html=True)
+        st.markdown('<div class="sec-title">📊 Résultat de l\'analyse</div>',
+                    unsafe_allow_html=True)
         if analyze_btn and user_text.strip():
             with st.spinner("Analyse en cours…"):
                 t0  = time.time()
@@ -1082,7 +1117,6 @@ with tab2:
 with tab3:
     st.markdown('<div class="sec-title">📋 Tableau de bord</div>', unsafe_allow_html=True)
 
-    # Résolution du chemin IMDB (Streamlit Cloud + Colab)
     possible_paths = [
         "IMDB_Dataset.csv",
         "/content/sentimentscope/IMDB_Dataset.csv",
@@ -1091,10 +1125,10 @@ with tab3:
     csv_path    = next((p for p in possible_paths if os.path.exists(p)), None)
     data_source = st.session_state.get("data_source", "IMDB Dataset")
 
-    # Lancement automatique si pas encore de résultats
     if "df_results" not in st.session_state:
         if csv_path is None:
-            st.info("💡 Importez un fichier via **📂 Importer un fichier** ou uploadez le dataset IMDB ci-dessous.")
+            st.info("💡 Importez un fichier via **📂 Importer un fichier** "
+                    "ou uploadez le dataset IMDB ci-dessous.")
             uploaded_csv = st.file_uploader(
                 "Uploader IMDB_Dataset.csv", type="csv", key="imdb_upload")
             if uploaded_csv:
@@ -1137,14 +1171,12 @@ with tab3:
     pct_pos = counts.get("POSITIVE", 0) / max(len(df_r), 1)
     trust   = round(1 + pct_pos * 4, 1)
 
-    # Source indicator
     st.markdown(
         f'<div style="font-size:.8rem;color:#aaa;margin-bottom:.6rem">'
         f'📁 Source : <b>{data_source}</b></div>',
         unsafe_allow_html=True,
     )
 
-    # TrustScore banner
     st.markdown(
         f'<div class="trust-banner">'
           f'<span class="score-pill" style="font-size:1.7rem;padding:.45rem 1.1rem">{trust}</span>'
@@ -1155,7 +1187,8 @@ with tab3:
             f'</div>'
             f'<div style="font-size:.8rem;color:#aaa">Basé sur {len(df_r)} avis analysés</div>'
           f'</div>'
-          f'<div style="margin-left:auto;text-align:right;font-size:.87rem;color:#555;line-height:2">'
+          f'<div style="margin-left:auto;text-align:right;font-size:.87rem;'
+          f'color:#555;line-height:2">'
             f'✅ <b>{counts.get("POSITIVE", 0)}</b> positifs<br>'
             f'❌ <b>{counts.get("NEGATIVE", 0)}</b> négatifs<br>'
             f'➖ <b>{counts.get("NEUTRAL",  0)}</b> neutres'
@@ -1164,13 +1197,12 @@ with tab3:
         unsafe_allow_html=True,
     )
 
-    # KPI cards
     c1, c2, c3, c4 = st.columns(4)
     for col_w, (val, color, lbl) in zip([c1, c2, c3, c4], [
-        (len(df_r),                              "#111",    "Avis analysés"),
-        (counts.get("POSITIVE", 0),              "#00b67a", "Positifs ★★★★★"),
-        (counts.get("NEGATIVE", 0),              "#e63946", "Négatifs ★☆☆☆☆"),
-        (f'{df_r["confidence"].mean():.1%}',     "#006b47", "Confiance moy."),
+        (len(df_r),                           "#111",    "Avis analysés"),
+        (counts.get("POSITIVE", 0),           "#00b67a", "Positifs ★★★★★"),
+        (counts.get("NEGATIVE", 0),           "#e63946", "Négatifs ★☆☆☆☆"),
+        (f'{df_r["confidence"].mean():.1%}',  "#006b47", "Confiance moy."),
     ]):
         with col_w:
             st.markdown(
@@ -1183,16 +1215,16 @@ with tab3:
 
     st.markdown("---")
 
-    # ── Résumé IA — Google Gemini ────────────────────────────────────────────
+    # ── Résumé IA Gemini ──────────────────────────────────────────────────────
     st.markdown('<div class="sec-title">🤖 Résumé IA — Google Gemini</div>',
                 unsafe_allow_html=True)
 
-    if not gemini_key:
+    if not gemini_key or not gemini_key.startswith("AIza"):
         st.markdown("""
         <div style="background:#fff8ec;border:1.5px solid #fed7aa;border-radius:12px;
                     padding:1rem 1.2rem;font-size:.9rem;color:#92400e">
-          ⚠️ <b>Clé API Google Gemini manquante.</b><br>
-          Renseignez votre clé dans la <b>sidebar ⚙️</b> pour activer cette fonctionnalité.<br>
+          ⚠️ <b>Clé API Google Gemini invalide ou manquante.</b><br>
+          Vérifiez la clé dans la <b>sidebar ⚙️</b> (doit commencer par <code>AIza…</code>).<br>
           Obtenez une clé gratuite sur
           <a href="https://aistudio.google.com" target="_blank"
              style="color:#00b67a;font-weight:600">aistudio.google.com</a>
@@ -1219,10 +1251,11 @@ with tab3:
                 f"- TrustScore global : {trust}/5.0",
                 f"- Modèle utilisé    : {model_choice}",
             ])
-            with st.spinner("🤖 Google Gemini analyse vos résultats…"):
+            with st.spinner("🤖 Google Gemini analyse vos résultats… (peut prendre 5–10 s)"):
                 try:
                     summary = call_gemini_summary(stats_text, gemini_key)
                     st.session_state["ai_summary"] = summary
+                    st.success("✅ Résumé IA généré avec succès !")
                 except RuntimeError as e:
                     st.error(f"❌ Erreur API Gemini : {e}")
                     st.session_state.pop("ai_summary", None)
@@ -1243,15 +1276,23 @@ with tab3:
             </div>
             """, unsafe_allow_html=True)
 
-    # ── Export PDF ───────────────────────────────────────────────────────────
+    # ── Export PDF ────────────────────────────────────────────────────────────
     st.markdown("---")
     st.markdown('<div class="sec-title">📥 Export PDF</div>', unsafe_allow_html=True)
-    st.markdown(
-        f"Template sélectionné : **{template_name}** "
-        f"_(modifier dans la sidebar ⚙️)_"
-    )
-    if st.button("📄 Générer le rapport PDF", use_container_width=False):
-        with st.spinner("Génération du PDF en cours…"):
+
+    col_pdf1, col_pdf2 = st.columns([2, 1])
+    with col_pdf1:
+        st.markdown(
+            f"Template sélectionné : **{template_name}** "
+            f"_(modifier dans la sidebar ⚙️)_"
+        )
+        if "ai_summary" not in st.session_state:
+            st.info("💡 Astuce : générez d'abord le résumé IA pour l'inclure dans le PDF.")
+    with col_pdf2:
+        gen_pdf_btn = st.button("📄 Générer le rapport PDF", use_container_width=True)
+
+    if gen_pdf_btn:
+        with st.spinner("Génération du PDF en cours… (quelques secondes)"):
             try:
                 pdf_bytes = generate_pdf_report(
                     df_r,
@@ -1259,9 +1300,16 @@ with tab3:
                     template_name, template, model_choice, len(df_r),
                 )
                 st.session_state["pdf_bytes"] = pdf_bytes
-                st.success("✅ Rapport PDF généré avec succès !")
+                st.success(
+                    f"✅ Rapport PDF généré ! "
+                    f"({len(pdf_bytes)//1024} Ko · "
+                    f"{len(df_r)} avis · template {template_name})"
+                )
             except Exception as e:
                 st.error(f"❌ Erreur lors de la génération PDF : {e}")
+                import traceback
+                with st.expander("Détails de l'erreur"):
+                    st.code(traceback.format_exc())
 
     if "pdf_bytes" in st.session_state:
         st.download_button(
@@ -1272,9 +1320,10 @@ with tab3:
             use_container_width=True,
         )
 
-    # ── Derniers avis analysés ───────────────────────────────────────────────
+    # ── Derniers avis ─────────────────────────────────────────────────────────
     st.markdown("---")
-    st.markdown('<div class="sec-title">🃏 Derniers avis analysés</div>', unsafe_allow_html=True)
+    st.markdown('<div class="sec-title">🃏 Derniers avis analysés</div>',
+                unsafe_allow_html=True)
     for _, row in df_r.head(6).iterrows():
         st.markdown(
             review_card_html(row["review"], row["sentiment_pred"],
@@ -1303,9 +1352,9 @@ with tab4:
         height=100,
     )
     col_o1, col_o2, col_o3 = st.columns(3)
-    with col_o1: do_lower = st.checkbox("🔡 Lowercasing **",  True)
-    with col_o2: do_stop  = st.checkbox("🚫 Stop words **",   True)
-    with col_o3: do_stem  = st.checkbox("✂️ Stemming **",     False)
+    with col_o1: do_lower = st.checkbox("🔡 Lowercasing",  True)
+    with col_o2: do_stop  = st.checkbox("🚫 Stop words",   True)
+    with col_o3: do_stem  = st.checkbox("✂️ Stemming",     False)
 
     if st.button("▶️ Appliquer le pipeline NLP", use_container_width=True):
         st.markdown("**Étape 1 — Texte brut**")
@@ -1313,12 +1362,12 @@ with tab4:
 
         lowered = sample_text.lower() if do_lower else sample_text
         if do_lower:
-            st.markdown("**Étape 2 — Lowercasing** **")
+            st.markdown("**Étape 2 — Lowercasing**")
             st.code(lowered)
 
         clean  = re.sub(r"[^a-zA-Z\s]", " ", lowered)
         tokens = clean.split()
-        st.markdown(f"**Étape 3 — Tokenisation** ** → **{len(tokens)} tokens**")
+        st.markdown(f"**Étape 3 — Tokenisation** → **{len(tokens)} tokens**")
         st.code(str(tokens[:20]))
 
         if do_stop:
@@ -1329,7 +1378,7 @@ with tab4:
             }
             tokens = [t for t in tokens if t not in STOP_W and len(t) > 2]
             st.markdown(
-                f"**Étape 4 — Suppression stop words** ** "
+                f"**Étape 4 — Suppression stop words** "
                 f"→ **{len(tokens)} tokens restants**"
             )
             st.code(str(tokens[:20]))
@@ -1341,29 +1390,30 @@ with tab4:
                 from nltk.stem import PorterStemmer
                 ps    = PorterStemmer()
                 stems = [ps.stem(t) for t in tokens[:12]]
-                st.markdown("**Étape 5 — Stemming** **")
+                st.markdown("**Étape 5 — Stemming**")
                 st.dataframe(
-                    pd.DataFrame({"Token original": tokens[:12], "Forme réduite (stem)": stems}),
+                    pd.DataFrame({
+                        "Token original": tokens[:12],
+                        "Forme réduite (stem)": stems
+                    }),
                     use_container_width=True,
                 )
             except Exception:
                 st.info("ℹ️ NLTK non disponible pour le stemming dans cet environnement.")
 
-        # BOW
         st.markdown("---")
         freq   = Counter(tokens)
         df_bow = pd.DataFrame(freq.most_common(14), columns=["Token", "Fréquence"])
         fig_bow = px.bar(
             df_bow, x="Token", y="Fréquence",
-            title="Bag of Words — Top 14 tokens **",
+            title="Bag of Words — Top 14 tokens",
             color_discrete_sequence=[template["primary"]],
         )
         fig_bow.update_layout(height=290, margin=dict(t=45, b=0))
         st.plotly_chart(fig_bow, use_container_width=True)
 
-        # TextBlob
         st.markdown("---")
-        st.markdown("**Polarité & Subjectivité — TextBlob** **")
+        st.markdown("**Polarité & Subjectivité — TextBlob**")
         tb = get_textblob_scores(sample_text)
         c1, c2 = st.columns(2)
         with c1:
@@ -1373,9 +1423,8 @@ with tab4:
             st.metric("Subjectivité", f'{tb["subjectivity"]:.3f}',
                       help="0 = objectif (faits) · 1 = subjectif (opinion)")
 
-        # Nuage de mots
         st.markdown("---")
-        st.markdown("**Nuage de mots** **")
+        st.markdown("**Nuage de mots**")
         img = make_wordcloud_img(" ".join(tokens), template["primary"], template["cmap_pos"])
         if img:
             st.markdown(
@@ -1457,8 +1506,7 @@ with tab5:
             fig_bx.update_layout(height=320, showlegend=False, margin=dict(t=50, b=0))
             st.plotly_chart(fig_bx, use_container_width=True)
 
-        # Nuages de mots
-        st.markdown('<div class="sec-title">☁️ Nuages de mots comparatifs **</div>',
+        st.markdown('<div class="sec-title">☁️ Nuages de mots comparatifs</div>',
                     unsafe_allow_html=True)
         col_w1, col_w2 = st.columns(2)
         pos_t = " ".join(df_v[df_v["sentiment_pred"] == "POSITIVE"]["review"].str[:200])
@@ -1498,9 +1546,9 @@ with tab6:
         </div>
         """, unsafe_allow_html=True)
     else:
-        from sklearn.feature_extraction.text  import TfidfVectorizer
-        from sklearn.linear_model             import LogisticRegression
-        from sklearn.model_selection          import train_test_split
+        from sklearn.feature_extraction.text import TfidfVectorizer
+        from sklearn.linear_model            import LogisticRegression
+        from sklearn.model_selection         import train_test_split
         from sklearn.metrics import (
             accuracy_score, f1_score, precision_score,
             recall_score, confusion_matrix,
@@ -1510,7 +1558,6 @@ with tab6:
         df_e["true_bin"] = (df_e["sentiment_vrai"] == "positive").astype(int)
         df_e["pred_bin"] = (df_e["sentiment_pred"] == "POSITIVE").astype(int)
 
-        # Métriques Transformer
         acc_tr  = accuracy_score(df_e["true_bin"], df_e["pred_bin"])
         f1_tr   = f1_score(df_e["true_bin"], df_e["pred_bin"],
                            average="weighted", zero_division=0)
@@ -1519,7 +1566,6 @@ with tab6:
         rec_tr  = recall_score(df_e["true_bin"], df_e["pred_bin"],
                                average="weighted", zero_division=0)
 
-        # Baseline TF-IDF + LogReg (slide 116–131)
         baseline_ok = False
         try:
             X, y = df_e["review"], df_e["true_bin"]
@@ -1538,7 +1584,6 @@ with tab6:
         except Exception:
             pass
 
-        # Tableau comparatif
         rows = [{
             "Modèle":     f"✅ {model_choice}",
             "Accuracy":   f"{acc_tr:.3f}",
@@ -1560,9 +1605,8 @@ with tab6:
             })
         st.dataframe(pd.DataFrame(rows), use_container_width=True, hide_index=True)
 
-        # Matrices de confusion 
         st.markdown(
-            '<div class="sec-title">🔢 Matrices de confusion **</div>',
+            '<div class="sec-title">🔢 Matrices de confusion</div>',
             unsafe_allow_html=True,
         )
         col_cm1, col_cm2 = st.columns(2)
@@ -1592,7 +1636,6 @@ with tab6:
                 fig_cm2.update_layout(height=310, margin=dict(t=55, b=10))
                 st.plotly_chart(fig_cm2, use_container_width=True)
 
-        # Radar comparatif
         st.markdown(
             '<div class="sec-title">📡 Radar comparatif des métriques</div>',
             unsafe_allow_html=True,
@@ -1618,7 +1661,6 @@ with tab6:
         )
         st.plotly_chart(fig_r, use_container_width=True)
 
-        # Interprétation
         delta    = f1_tr - (f1_lr if baseline_ok else 0)
         gain_str = f"  Gain vs baseline : <b>{delta:+.3f}</b>" if baseline_ok else ""
         st.markdown(
