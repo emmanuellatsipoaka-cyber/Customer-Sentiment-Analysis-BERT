@@ -1560,9 +1560,9 @@ with tab6:
             })
         st.dataframe(pd.DataFrame(rows), use_container_width=True, hide_index=True)
 
-        # Matrices de confusion (slide 128)
+        # Matrices de confusion 
         st.markdown(
-            '<div class="sec-title">🔢 Matrices de confusion *(slide 128)*</div>',
+            '<div class="sec-title">🔢 Matrices de confusion **</div>',
             unsafe_allow_html=True,
         )
         col_cm1, col_cm2 = st.columns(2)
