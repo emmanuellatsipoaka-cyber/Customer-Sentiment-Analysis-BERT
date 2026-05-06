@@ -225,4 +225,4 @@ Projet NLP demander par **Prof. Ing Gracieux Hounna**
 📧 emmanuellatsipoaka@gmail.com  
 🔗 [GitHub](Dépôt disponible sur :
    https://github.com/emmanuellatsipoaka-cyber/Customer-Sentiment-Analysis-BERT)  
-🌐 [Démo](https://customer-sentiment-analysis-bert-mbqsywh6rxjezu7d2vuyfl.streamlit.app/#analyse-ia)
+🌐 [Démo]( https://customer-sentiment-analysis-bert-mbqsywh6rxjezu7d2vuyfl.streamlit.app/#analyse-ia )
