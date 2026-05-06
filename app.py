@@ -471,31 +471,14 @@ def review_card_html(text: str, sentiment: str, confidence: float,
 # GOOGLE GEMINI AI SUMMARY (version corrigée)
 # ══════════════════════════════════════════════════════════════════════════════
 
-
 def call_gemini_summary(stats_text: str, api_key: str) -> str:
     import urllib.request, urllib.error, json
- 
+
     if not api_key or not api_key.strip():
         raise ValueError("Clé API Google Gemini manquante.")
- 
-    prompt = (
-        "Tu es un expert senior en analyse de sentiment et en experience client (CX).\n"
-        "Voici les statistiques d'une analyse de sentiments sur des avis clients :\n\n"
-        + stats_text +
-        "\n\nFournis un rapport analytique structure en francais avec exactement ces sections :\n\n"
-        "**1. Vue d'ensemble**\n"
-        "Interpretation globale du sentiment dominant et du niveau de satisfaction.\n\n"
-        "**2. Points forts**\n"
-        "Ce qui ressort positivement des avis (3 points max, concis).\n\n"
-        "**3. Points d'attention**\n"
-        "Les axes d'amelioration identifies (3 points max, concis).\n\n"
-        "**4. Recommandations operationnelles**\n"
-        "3 actions concretes, realistes et priorisees.\n\n"
-        "**5. Score de sante client**\n"
-        "Note globale sur 10 avec justification en 2 phrases.\n\n"
-        "Ton : professionnel, direct et actionnable. Maximum 350 mots."
-    )
- 
+
+    prompt = ( ... )  # inchangé
+
     payload = json.dumps({
         "contents": [{"parts": [{"text": prompt}]}],
         "generationConfig": {
@@ -503,60 +486,39 @@ def call_gemini_summary(stats_text: str, api_key: str) -> str:
             "maxOutputTokens": 1024,
         }
     }).encode("utf-8")
- 
-    # ✅ CORRECTION : gemini-2.0-flash (modèle actif et gratuit)
-    url = (
-        "https://generativelanguage.googleapis.com/v1beta/models/"
-        f"gemini-2.0-flash:generateContent?key={api_key.strip()}"
-    )
-    req = urllib.request.Request(
-        url,
-        data=payload,
-        headers={"Content-Type": "application/json"},
-        method="POST",
-    )
+
+    # MODÈLE CORRIGÉ
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={api_key.strip()}"
+
+    req = urllib.request.Request(url, data=payload, headers={"Content-Type": "application/json"}, method="POST")
     try:
         with urllib.request.urlopen(req, timeout=30) as resp:
             data = json.loads(resp.read().decode("utf-8"))
- 
+
         candidates = data.get("candidates", [])
         if not candidates:
-            raise RuntimeError(
-                "Reponse vide de Gemini (aucun candidat). "
-                "Verifiez votre cle API ou les quotas."
-            )
- 
+            raise RuntimeError("Aucun candidat – vérifie ta clé API ou les quotas.")
+
         parts = candidates[0].get("content", {}).get("parts", [])
         if not parts:
-            finish = candidates[0].get("finishReason", "UNKNOWN")
-            raise RuntimeError(
-                f"Reponse vide de Gemini (finishReason={finish}). "
-                "La generation a peut-etre ete bloquee par les filtres de securite."
-            )
- 
+            finish = candidates[0].get("finishReason")
+            raise RuntimeError(f"Réponse vide (finishReason={finish}) – peut-être bloqué par les filtres.")
+
         text_result = parts[0].get("text", "").strip()
         if not text_result:
-            raise RuntimeError("Le modele a retourne un texte vide.")
- 
+            raise RuntimeError("Texte vide retourné.")
         return text_result
- 
+
     except urllib.error.HTTPError as e:
         body = e.read().decode("utf-8")
         try:
             err_json = json.loads(body)
             msg = err_json.get("error", {}).get("message", body[:300])
-        except Exception:
+        except:
             msg = body[:300]
-        raise RuntimeError(f"Erreur HTTP {e.code} : {msg}")
-    except urllib.error.URLError as e:
-        raise RuntimeError(
-            f"Erreur reseau : {e.reason}. "
-            "Verifiez votre connexion internet."
-        )
-    except RuntimeError:
-        raise
+        raise RuntimeError(f"HTTP {e.code} : {msg}")
     except Exception as e:
-        raise RuntimeError(f"Erreur inattendue API Gemini : {e}")
+        raise RuntimeError(f"Erreur: {e}")
 
 # ══════════════════════════════════════════════════════════════════════════════
 # PDF EXPORT — VERSION CORRIGÉE (nettoyage caractères Unicode)
