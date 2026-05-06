@@ -1,6 +1,6 @@
 """
 =============================================================
-  AvisCheckeur — Analyse de Sentiments IMDB / Custom
+  AvisCheckeur — Analyse de avis IMDB / Custom
   ISE3 ENEAM · Prof. Gracieux Hounna · 2025
   Auteur: Emmanuella TSIPOAKA 
   Stack : Streamlit · HuggingFace Transformers · TextBlob
