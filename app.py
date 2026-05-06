@@ -474,11 +474,51 @@ def review_card_html(text: str, sentiment: str, confidence: float,
 def call_gemini_summary(stats_text: str, api_key: str) -> str:
     import urllib.request, urllib.error, json
 
+    # ---------- 1. Validation et nettoyage de l'API key ----------
     if not api_key or not api_key.strip():
         raise ValueError("Clé API Google Gemini manquante.")
 
-    prompt = ( ... )  # inchangé
+    # ---------- 2. Conversion robuste de stats_text (CAS PAR CAS) ----------
+    if stats_text is None:
+        stats_text_clean = ""
+    elif isinstance(stats_text, bytes):
+        stats_text_clean = stats_text.decode("utf-8", errors="replace")
+    else:
+        # Pour tout autre type (int, float, list, dict, DataFrame...)
+        try:
+            stats_text_clean = str(stats_text)
+        except Exception:
+            stats_text_clean = ""
 
+    # Nettoyage supplémentaire : éliminer les caractères non imprimables / non UTF-8
+    stats_text_clean = stats_text_clean.encode("utf-8", errors="replace").decode("utf-8")
+
+    # ---------- 3. Construction du prompt ----------
+    prompt = (
+        "Tu es un expert senior en analyse de sentiment et en experience client (CX).\n"
+        "Voici les statistiques d'une analyse de sentiments sur des avis clients :\n\n"
+        + stats_text_clean +
+        "\n\nFournis un rapport analytique structure en francais avec exactement ces sections :\n\n"
+        "**1. Vue d'ensemble**\n"
+        "Interpretation globale du sentiment dominant et du niveau de satisfaction.\n\n"
+        "**2. Points forts**\n"
+        "Ce qui ressort positivement des avis (3 points max, concis).\n\n"
+        "**3. Points d'attention**\n"
+        "Les axes d'amelioration identifies (3 points max, concis).\n\n"
+        "**4. Recommandations operationnelles**\n"
+        "3 actions concretes, realistes et priorisees.\n\n"
+        "**5. Score de sante client**\n"
+        "Note globale sur 10 avec justification en 2 phrases.\n\n"
+        "Ton : professionnel, direct et actionnable. Maximum 350 mots."
+    )
+
+    # Vérification finale que le prompt est une chaîne JSON-serialisable
+    try:
+        json.dumps({"test": prompt})  # échouera si prompt contient des objets non sérialisables
+    except TypeError as e:
+        raise RuntimeError(f"Le prompt contient un objet non sérialisable : {e}")
+
+    # ---------- 4. Construction de la requête ----------
     payload = json.dumps({
         "contents": [{"parts": [{"text": prompt}]}],
         "generationConfig": {
@@ -487,38 +527,53 @@ def call_gemini_summary(stats_text: str, api_key: str) -> str:
         }
     }).encode("utf-8")
 
-    # MODÈLE CORRIGÉ
+    # Modèle corrigé : gemini-1.5-flash (existe officiellement)
     url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={api_key.strip()}"
 
-    req = urllib.request.Request(url, data=payload, headers={"Content-Type": "application/json"}, method="POST")
+    req = urllib.request.Request(
+        url,
+        data=payload,
+        headers={"Content-Type": "application/json"},
+        method="POST",
+    )
+
+    # ---------- 5. Envoi et gestion des erreurs ----------
     try:
         with urllib.request.urlopen(req, timeout=30) as resp:
             data = json.loads(resp.read().decode("utf-8"))
 
         candidates = data.get("candidates", [])
         if not candidates:
-            raise RuntimeError("Aucun candidat – vérifie ta clé API ou les quotas.")
+            raise RuntimeError("Reponse vide de Gemini (aucun candidat). Verifiez votre cle API ou les quotas.")
 
         parts = candidates[0].get("content", {}).get("parts", [])
         if not parts:
-            finish = candidates[0].get("finishReason")
-            raise RuntimeError(f"Réponse vide (finishReason={finish}) – peut-être bloqué par les filtres.")
+            finish = candidates[0].get("finishReason", "UNKNOWN")
+            raise RuntimeError(
+                f"Reponse vide de Gemini (finishReason={finish}). "
+                "La generation a peut-etre ete bloquee par les filtres de securite."
+            )
 
         text_result = parts[0].get("text", "").strip()
         if not text_result:
-            raise RuntimeError("Texte vide retourné.")
+            raise RuntimeError("Le modele a retourne un texte vide.")
+
         return text_result
 
     except urllib.error.HTTPError as e:
-        body = e.read().decode("utf-8")
+        body = e.read().decode("utf-8", errors="replace")
         try:
             err_json = json.loads(body)
             msg = err_json.get("error", {}).get("message", body[:300])
-        except:
+        except Exception:
             msg = body[:300]
-        raise RuntimeError(f"HTTP {e.code} : {msg}")
+        raise RuntimeError(f"Erreur HTTP {e.code} : {msg}")
+    except urllib.error.URLError as e:
+        raise RuntimeError(f"Erreur reseau : {e.reason}. Verifiez votre connexion internet.")
+    except RuntimeError:
+        raise
     except Exception as e:
-        raise RuntimeError(f"Erreur: {e}")
+        raise RuntimeError(f"Erreur inattendue API Gemini : {e}")
 
 # ══════════════════════════════════════════════════════════════════════════════
 # PDF EXPORT — VERSION CORRIGÉE (nettoyage caractères Unicode)
