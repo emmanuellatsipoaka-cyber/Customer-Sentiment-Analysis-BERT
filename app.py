@@ -472,14 +472,14 @@ def review_card_html(text: str, sentiment: str, confidence: float,
 
 
 # ══════════════════════════════════════════════════════════════════════════════
-# GOOGLE GEMINI AI SUMMARY — VERSION CORRIGÉE
+# GOOGLE GEMINI AI SUMMARY — VERSION CORRIGÉE (modèle actif et API v1)
 # ══════════════════════════════════════════════════════════════════════════════
 
 def call_gemini_summary(stats_text: str, api_key: str) -> str:
     """
-    Appel à l'API Google Gemini (gemini-1.5-flash) pour générer
+    Appel à l'API Google Gemini (gemini-2.0-flash) pour générer
     un résumé analytique structuré des sentiments.
-    VERSION CORRIGÉE : gestion d'erreurs robuste + navigation sécurisée JSON.
+    VERSION CORRIGÉE : utilisation de l'API stable v1 et d'un modèle actif.
     """
     if not api_key or not api_key.strip():
         raise ValueError("Clé API Google Gemini manquante.")
@@ -510,9 +510,10 @@ def call_gemini_summary(stats_text: str, api_key: str) -> str:
         }
     }).encode("utf-8")
 
+    # Correction : API v1 stable et modèle gemini-2.0-flash (actif)
     url = (
-        "https://generativelanguage.googleapis.com/v1beta/models/"
-        f"gemini-1.5-flash:generateContent?key={api_key.strip()}"
+        "https://generativelanguage.googleapis.com/v1/models/"
+        f"gemini-2.0-flash:generateContent?key={api_key.strip()}"
     )
     req = urllib.request.Request(
         url,
